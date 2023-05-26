@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="NFCProj.LogTagPage"
+             Title="LogTagPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Picker x:Name="sourceLocationPicker" Title="Select Source Location" SelectedIndexChanged="Picker_SelectedIndexChanged" />
+            <Picker x:Name="destinationLocationPicker" Title="Select Destination Location" SelectedIndexChanged="Picker_SelectedIndexChanged" />
+            <Button Text="Calculate Route" Clicked="CalculateRouteButton_Clicked" AutomationId="CalculateRouteButton" />
+            <Button Text="Scan NFC Tag" Clicked="ScanButton_Clicked" AutomationId="ScanButton" />
+        </StackLayout>
+        <!--<StackLayout>
+            <Picker x:Name="sourceLocationPicker" Title="Select Source Location">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Location A</x:String>
+                        <x:String>Location B</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+            <Picker x:Name="destinationLocationPicker" Title="Select Destination Location">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Location X</x:String>
+                        <x:String>Location Y</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+            <Button Text="Calculate Route" Clicked="CalculateRouteButton_Clicked" AutomationId="CalculateRouteButton" />
+            <Button Text="Scan NFC Tag" Clicked="ScanButton_Clicked" AutomationId="ScanButton" />
+        </StackLayout>-->
+    </ContentPage.Content>
+</ContentPage>
