@@ -133,8 +133,9 @@ public partial class RegisterTagPage : ContentPage
             CrossNFC.Current.StartListening();
 
             // Update button text and read status
-            //btnRead.Text = "Stop Reading";
+            btnRead.Text = "Turn off NFC Scanner";
             reading = true;
+            //saveTag.IsVisible = true;
         }
         else
         {
@@ -149,8 +150,9 @@ public partial class RegisterTagPage : ContentPage
             CrossNFC.Current.OnNfcStatusChanged -= Current_OnNfcStatusChanged;
 
             // Update button text and read status
-            //btnRead.Text = "Read";
+            btnRead.Text = "Turn on NFC scanner";
             reading = false;
+            //saveTag.IsVisible = false;
         }
     }
 
@@ -227,13 +229,13 @@ public partial class RegisterTagPage : ContentPage
         try
         {
             // Create a new text record 
-            readInfo.Records = new NFCNdefRecord[] {
-                new NFCNdefRecord() {
-                    TypeFormat = NFCNdefTypeFormat.Uri,
-                    Payload = System.Text.Encoding.UTF8.GetBytes("https://www.nuget.org/packages/Plugin.NFC"),
-                    LanguageCode = "en"
-                }
-            };
+            //readInfo.Records = new NFCNdefRecord[] {
+            //    new NFCNdefRecord() {
+            //        TypeFormat = NFCNdefTypeFormat.Uri,
+            //        Payload = System.Text.Encoding.UTF8.GetBytes("https://www.nuget.org/packages/Plugin.NFC"),
+            //        LanguageCode = "en"
+            //    }
+            //};
 
             // Attempt to write text record to NFC tag
             CrossNFC.Current.PublishMessage(readInfo);
@@ -249,6 +251,7 @@ public partial class RegisterTagPage : ContentPage
             WriteClicked(null, null);
         }
     }
+
     /// <summary>
     /// Event fired when an NFC message is successfully written (published) to an NFC tag.
     /// </summary>
@@ -260,6 +263,7 @@ public partial class RegisterTagPage : ContentPage
         // Dispatch alert to the UI
         Dispatcher.Dispatch(() => DisplayAlert("NFC Event", $"Write successful.", "OK"));
     }
+
     /// <summary>
     /// Event fired when an NFC message is received (read) from a tag.
     /// </summary>
@@ -268,6 +272,8 @@ public partial class RegisterTagPage : ContentPage
     {
         // Save tag info
         readInfo = tagInfo;
+
+        saveTag.IsVisible = true;
 
         // Dispatch UI update to display tag info
         Dispatcher.Dispatch(() =>
