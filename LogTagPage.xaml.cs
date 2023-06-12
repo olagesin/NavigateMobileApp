@@ -1,6 +1,8 @@
 using Microsoft.Maui.Devices.Sensors;
 using Newtonsoft.Json;
-using NFCProj.Models;
+using NFCProj.DTOs;
+//using NFCProj.Models;
+using Plugin.NFC;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -9,71 +11,66 @@ namespace NFCProj;
 public partial class LogTagPage : ContentPage
 {
     private const string LogTagEndpoint = "https://parvigateapi.azurewebsites.net/Tags/log-tag";
-    private const string AssignToTagEndpoint = "https://parvigateapi.azurewebsites.net/Tags/assign-to-tag";
+    private const string AssignToTagEndpoint = "https://parvigateapi.azurewebsites.net/LocationTags/assign-location-to-tag";
     private const string GetLocationsEndpoint = "https://parvigateapi.azurewebsites.net/Locations/list-all-locations";
 
     private Button calculateRouteButton;
     private Button scanButton;
-    private Picker sourcePicker;
-    private Picker destinationPicker;
+    //private Picker sourcePicker;
+    //private Picker destinationPicker;
 
-    private List<GetLocaationDto> Locations;
+    private List<GetLocationDto> Locations;
+
+    /// <summary>
+    /// Indicates whether an NFC read is taking place.
+    /// </summary>
+    private bool reading = false;
+    /// <summary>
+    /// Indicates whether an NFC write is taking place.
+    /// </summary>
+    private bool writing = false;
+    /// <summary>
+    /// The most recently saved NFC tag info.
+    /// </summary>
+    private ITagInfo readInfo = null;
+
+    private string locationId = string.Empty;
+
 
     public LogTagPage()
 	{
         InitializeComponent();
+    }
 
-        Title = "Log Tag";
-
-        sourcePicker = new Picker
+    private bool GetNFCStatus()
+    {
+        if (!CrossNFC.IsSupported)
+            NfcStatus.Text = "NFC Status: Not Supported";
+        else if (!CrossNFC.Current.IsAvailable)
+            NfcStatus.Text = "NFC Status: Not Available";
+        else if (!CrossNFC.Current.IsEnabled)
+            NfcStatus.Text = "NFC Status: Not Enabled";
+        else
         {
-            Title = "Select Source Location"
-        };
-
-        destinationPicker = new Picker
-        {
-            Title = "Select Destination Location"
-        };
-
-        calculateRouteButton = new Button
-        {
-            Text = "Calculate Route",
-            AutomationId = "CalculateRouteButton"
-        };
-        calculateRouteButton.Clicked += CalculateRouteButton_Clicked;
-
-        scanButton = new Button
-        {
-            Text = "Scan NFC Tag",
-            AutomationId = "ScanButton"
-        };
-        scanButton.Clicked += ScanButton_Clicked;
-
-        Content = new StackLayout
-        {
-            Children =
-            {
-                sourcePicker,
-                destinationPicker,
-                calculateRouteButton,
-                scanButton
-            }
-        };
+            NfcStatus.Text = "NFC Status: Ready";
+            return true;
+        }
+        return false;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         
-        //load locations from the endpoint
         await LoadLocations();
+
+        GetNFCStatus();
     }
 
     private async Task LoadLocations()
     {
         var httpClient = new HttpClient();
         var bearertoken = Preferences.Get("Token", "Invalid token");
-        Token.Text = Preferences.Get("Token", "Invalid token");
 
         httpClient.DefaultRequestHeaders.Authorization =
                       new AuthenticationHeaderValue("Bearer", bearertoken.Replace("\"", ""));
@@ -83,9 +80,11 @@ public partial class LogTagPage : ContentPage
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
-            var responseData = JsonConvert.DeserializeObject<GlobalResponse<List<GetLocaationDto>>>(content);
+            var responseData = JsonConvert.DeserializeObject<GlobalResponse<List<GetLocationDto>>>(content);
 
             Locations = responseData.Data;
+
+            
 
             // Update source and destination pickers with location names
             foreach (var location in Locations)
@@ -117,7 +116,7 @@ public partial class LogTagPage : ContentPage
         }
     }
 
-    private GetLocaationDto GetSelectedLocation(string locationName)
+    private GetLocationDto GetSelectedLocation(string locationName)
     {
         return Locations.Find(location => location.Name == locationName);
     }
@@ -141,36 +140,66 @@ public partial class LogTagPage : ContentPage
         var sourceLocation = GetSelectedLocation(sourcePicker.SelectedItem.ToString());
         var destinationLocation = GetSelectedLocation(destinationPicker.SelectedItem.ToString());
 
-        // Simulating assigned route
-        var assignedRoute = new
-        {
-            RouteId = "123",
-            RouteDetails = "Route details"
-        };
+        CrossNFC.Current.StartListening();
 
-        // Posting assigned route details to the endpoint
-        var httpClient = new HttpClient();
-        var jsonContent = new StringContent(
-            Newtonsoft.Json.JsonConvert.SerializeObject(assignedRoute),
-            Encoding.UTF8,
-            "application/json"
-        );
-        var response = await httpClient.PostAsync(AssignToTagEndpoint, jsonContent);
+        CrossNFC.Current.OnMessageReceived += Current_OnMessageReceived;
 
-        if (response.IsSuccessStatusCode)
+        if(readInfo is null)
         {
-            await DisplayAlert("Success", "Tag assigned successfully", "OK");
+            await DisplayAlert("Error", "Please place an NFC device to be scanned", "OK");
+            return;
         }
         else
         {
-            await DisplayAlert("Error", "Failed to assign tag", "OK");
+            var routeToCalculate = new AddLocationTagDto()
+            {
+                SourceLocationId = sourceLocation.Id,
+                DestinationLocationId = destinationLocation.Id,
+                SerialNumber = readInfo.SerialNumber,
+                UserName = "Sample user"
+            };
+
+            // Posting assigned route details to the endpoint
+            var httpClient = new HttpClient();
+            var bearerToken = Preferences.Get("Token", null);
+
+
+            var jsonContent = new StringContent(
+                Newtonsoft.Json.JsonConvert.SerializeObject(routeToCalculate),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {bearerToken}");
+
+            var response = await httpClient.PostAsync(AssignToTagEndpoint, jsonContent);
+
+            var responseAsString = await response.Content.ReadAsStringAsync();
+
+            var responseData = JsonConvert.DeserializeObject<GlobalResponse<GetLocationTagDto>>(responseAsString);
+
+            if (response.IsSuccessStatusCode)
+            {
+                CrossNFC.Current.StartPublishing();
+
+                CrossNFC.Current.OnTagDiscovered += Current_OnTagDiscovered;
+
+                await DisplayAlert("Success", $"User assigned to {responseData.Data.Location.Name}", "OK");
+
+                CrossNFC.Current.StopPublishing();
+            }
+            else
+            {
+                //await DisplayAlert("Error", "Failed to assign tag", "OK");
+                await DisplayAlert(responseData.Errors.FirstOrDefault().Key,
+                responseData.Errors.FirstOrDefault().ErrorMessages.FirstOrDefault(), "OK");
+            }
         }
     }
 
     private async void ScanButton_Clicked(object sender, EventArgs e)
     {
-        // TODO: Implement NFC scanning logic
-
         // Simulating tag scanning
         var scannedTag = "123456";
 
@@ -190,6 +219,51 @@ public partial class LogTagPage : ContentPage
         else
         {
             await DisplayAlert("Error", "Failed to log tag", "OK");
+        }
+    }
+
+    /// <summary>
+    /// Event fired when an NFC message is received (read) from a tag.
+    /// </summary>
+    /// <param name="tagInfo">The tag information which was read.</param>
+    private void Current_OnMessageReceived(ITagInfo tagInfo)
+    {
+        // update taginfo
+        readInfo = tagInfo;
+    }
+
+
+    /// <summary>
+    /// Event fired when an NFC tag is discovered while writing.
+    /// </summary>
+    /// <param name="tagInfo">The NFC tag's info.</param>
+    /// <param name="format">Indicates whether the NFC tag is being formatted.</param>
+    private void Current_OnTagDiscovered(ITagInfo tagInfo, bool format)
+    {
+        try
+        {
+            // Create a new text record 
+            readInfo.Records = new NFCNdefRecord[] {
+                new NFCNdefRecord() {
+                    TypeFormat = NFCNdefTypeFormat.Uri,
+                    Payload = System.Text.Encoding.UTF8.GetBytes($"https://parvigateapi.azurewebsites.net/Locations/get-location?locationId={locationId}"),
+                    LanguageCode = "en"
+                }
+            };
+
+            // Attempt to write text record to NFC tag
+            CrossNFC.Current.PublishMessage(readInfo);
+        }
+        catch
+        {
+            // Writing not supported, dispatch alert to the UI
+            Dispatcher.Dispatch(() => DisplayAlert("NFC Error", $"Failed to write tag.", "OK"));
+        }
+        finally
+        {
+            // Stop writing
+            //WriteClicked(null, null);
+            CrossNFC.Current.StopPublishing();
         }
     }
 }

@@ -57,19 +57,22 @@ public partial class MainPage : ContentPage
         if (response.IsSuccessStatusCode)
         {
             token = responseData.Data.Token;
+            var tokenToSave = token.Replace("\"", "");
+
             httpClient.DefaultRequestHeaders.Authorization =
-                     new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+                     new AuthenticationHeaderValue("Bearer", tokenToSave);
+
+            // Save the token in local storage
+            Preferences.Set("Token", tokenToSave);
+
+            // Navigate to the next page
+            await Navigation.PushAsync(new HomePage());
         }
         else
         {
             await DisplayAlert(responseData.Errors.FirstOrDefault().Key,
                 responseData.Errors.FirstOrDefault().ErrorMessages.FirstOrDefault(), "OK");
         }
-
-        // Save the token in local storage
-        Preferences.Set("Token", token);
-
-        // Navigate to the next page
-        await Navigation.PushAsync(new LogTagPage());
     }
+
 }

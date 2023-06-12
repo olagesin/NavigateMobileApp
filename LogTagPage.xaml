@@ -5,11 +5,11 @@
              Title="LogTagPage">
     <ContentPage.Content>
         <StackLayout>
-            <Picker x:Name="sourceLocationPicker" Title="Select Source Location" SelectedIndexChanged="Picker_SelectedIndexChanged" />
-            <Picker x:Name="destinationLocationPicker" Title="Select Destination Location" SelectedIndexChanged="Picker_SelectedIndexChanged" />
+            <Picker x:Name="sourcePicker" Title="Select Source Location" SelectedIndexChanged="Picker_SelectedIndexChanged" />
+            <Picker x:Name="destinationPicker" Title="Select Destination Location" SelectedIndexChanged="Picker_SelectedIndexChanged" />
             <Button Text="Calculate Route" Clicked="CalculateRouteButton_Clicked" AutomationId="CalculateRouteButton" />
             <Button Text="Scan NFC Tag" Clicked="ScanButton_Clicked" AutomationId="ScanButton" />
-            <Label x:Name="Token" Text="NFC Status:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+            <Label x:Name="NfcStatus" Text="NFC Status:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

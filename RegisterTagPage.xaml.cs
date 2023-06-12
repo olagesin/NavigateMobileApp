@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using NFCProj.Models;
+using NFCProj.DTOs;
 using Plugin.NFC;
 using System.Text;
 using System.Threading;
@@ -122,6 +122,10 @@ public partial class RegisterTagPage : ContentPage
 
         if (!reading)
         {
+            // Start listening
+            CrossNFC.Current.StartListening();
+
+
             // Attach NFC events
             CrossNFC.Current.OnMessageReceived += Current_OnMessageReceived;
             CrossNFC.Current.OnMessagePublished += Current_OnMessagePublished;
@@ -129,8 +133,6 @@ public partial class RegisterTagPage : ContentPage
             CrossNFC.Current.OnTagListeningStatusChanged += Current_OnTagListeningStatusChanged;
             CrossNFC.Current.OnNfcStatusChanged += Current_OnNfcStatusChanged;
 
-            // Start listening
-            CrossNFC.Current.StartListening();
 
             // Update button text and read status
             btnRead.Text = "Turn off NFC Scanner";
@@ -164,19 +166,20 @@ public partial class RegisterTagPage : ContentPage
         {
             SerialNumber = readInfo.SerialNumber
         };
-        //var tagDetails = new 
-        //{
-        //    TagId = "123456",
-        //    TagData = "Some data"
-        //};
 
         // Posting tag details to the endpoint
         var httpClient = new HttpClient();
+        var bearerToken = Preferences.Get("Token", null);
+
         var jsonContent = new StringContent(
             Newtonsoft.Json.JsonConvert.SerializeObject(tagToAdd),
             Encoding.UTF8,
             "application/json"
         );
+
+        httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {bearerToken}");
+
         var response = await httpClient.PostAsync(RegisterTagEndpoint, jsonContent);
 
         var responseAsString = await response.Content.ReadAsStringAsync();
@@ -227,13 +230,14 @@ public partial class RegisterTagPage : ContentPage
         try
         {
             // Create a new text record 
-            //readInfo.Records = new NFCNdefRecord[] {
-            //    new NFCNdefRecord() {
-            //        TypeFormat = NFCNdefTypeFormat.Uri,
-            //        Payload = System.Text.Encoding.UTF8.GetBytes("https://www.nuget.org/packages/Plugin.NFC"),
-            //        LanguageCode = "en"
-            //    }
-            //};
+            readInfo.Records = new NFCNdefRecord[] {
+                new NFCNdefRecord() {
+                    TypeFormat = NFCNdefTypeFormat.Uri,
+                    Payload = System.Text.Encoding.UTF8.GetBytes("https://www.nuget.org/packages/Plugin.NFC"),
+                    LanguageCode = "en"
+                }
+            };
+
 
             // Attempt to write text record to NFC tag
             CrossNFC.Current.PublishMessage(readInfo);
@@ -253,11 +257,9 @@ public partial class RegisterTagPage : ContentPage
     /// <summary>
     /// Event fired when an NFC message is successfully written (published) to an NFC tag.
     /// </summary>
-    /// <param name="tagInfo">The tag informatio which was written.</param>
+    /// <param name="tagInfo">The tag information which was written.</param>
     private void Current_OnMessagePublished(ITagInfo tagInfo)
     {
-        // ** NEVER REACHED, NEED MORE DEBUGGING ** \\
-
         // Dispatch alert to the UI
         Dispatcher.Dispatch(() => DisplayAlert("NFC Event", $"Write successful.", "OK"));
     }

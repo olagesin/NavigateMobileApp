@@ -5,7 +5,6 @@
              Title="RegisterTagPage">
     <VerticalStackLayout>
 
-        <!--<Label Text="Hello!" HorizontalTextAlignment="Center" FontSize="25" TextColor="Black" HorizontalOptions="Center"/>-->
         <Label Text="Scan NFC Device!" Margin="0,-20,0,15" HorizontalTextAlignment="Center" TextColor="Black" FontSize="15" HorizontalOptions="Center"/>
         
         <Button x:Name="btnRead" Text="Turn on NFC Scanner" Clicked="ReadClicked" HorizontalOptions="FillAndExpand"/>
@@ -13,12 +12,8 @@
         
         <Button x:Name="btnWrite" Text="Write" Clicked="WriteClicked" BackgroundColor="#808080" TextColor="Black" HorizontalOptions="FillAndExpand"/>
         
-        <Label x:Name="lblStatus" Text="NFC Status:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+        <Label x:Name="lblStatus" Text="NFC Status on device:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
 
-        <!--<Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />-->
         <Button x:Name="saveTag" Text="Save Tag details" Clicked="ScanButton_Clicked" AutomationId="ScanButton" IsVisible="False"/>
 
         <StackLayout x:Name="tagData" Orientation="Horizontal" HorizontalOptions="Center" IsVisible="False" >
