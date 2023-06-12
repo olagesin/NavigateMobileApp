@@ -158,8 +158,6 @@ public partial class RegisterTagPage : ContentPage
 
     private async void ScanButton_Clicked(object sender, EventArgs e)
     {
-        // TODO: Implement NFC scanning logic
-
 
         // Simulating tag details
         var tagToAdd = new AddTagDto()

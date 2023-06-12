@@ -1,6 +1,7 @@
 using Microsoft.Maui.Devices.Sensors;
 using Newtonsoft.Json;
 using NFCProj.Models;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace NFCProj;
@@ -29,17 +30,10 @@ public partial class LogTagPage : ContentPage
             Title = "Select Source Location"
         };
 
-
-        //sourcePicker.Items.Add("Location A");
-        //sourcePicker.Items.Add("Location B");
-
         destinationPicker = new Picker
         {
             Title = "Select Destination Location"
         };
-
-        //destinationPicker.Items.Add("Location X");
-        //destinationPicker.Items.Add("Location Y");
 
         calculateRouteButton = new Button
         {
@@ -70,7 +64,7 @@ public partial class LogTagPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-
+        
         //load locations from the endpoint
         await LoadLocations();
     }
@@ -78,6 +72,12 @@ public partial class LogTagPage : ContentPage
     private async Task LoadLocations()
     {
         var httpClient = new HttpClient();
+        var bearertoken = Preferences.Get("Token", "Invalid token");
+        Token.Text = Preferences.Get("Token", "Invalid token");
+
+        httpClient.DefaultRequestHeaders.Authorization =
+                      new AuthenticationHeaderValue("Bearer", bearertoken.Replace("\"", ""));
+
         var response = await httpClient.GetAsync(GetLocationsEndpoint);
 
         if (response.IsSuccessStatusCode)
