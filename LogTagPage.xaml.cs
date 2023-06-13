@@ -159,6 +159,8 @@ public partial class LogTagPage : ContentPage
                 UserName = "Sample user"
             };
 
+            CrossNFC.Current.StopListening();
+
             // Posting assigned route details to the endpoint
             var httpClient = new HttpClient();
             var bearerToken = Preferences.Get("Token", null);
@@ -181,11 +183,13 @@ public partial class LogTagPage : ContentPage
 
             if (response.IsSuccessStatusCode)
             {
+                CrossNFC.Current.OnTagDiscovered += Current_OnTagDiscoveredInLog;
+
                 CrossNFC.Current.StartPublishing();
 
-                CrossNFC.Current.OnTagDiscovered += Current_OnTagDiscovered;
-
                 await DisplayAlert("Success", $"User assigned to {responseData.Data.Location.Name}", "OK");
+
+                CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscoveredInLog;
 
                 CrossNFC.Current.StopPublishing();
             }
@@ -238,7 +242,7 @@ public partial class LogTagPage : ContentPage
     /// </summary>
     /// <param name="tagInfo">The NFC tag's info.</param>
     /// <param name="format">Indicates whether the NFC tag is being formatted.</param>
-    private void Current_OnTagDiscovered(ITagInfo tagInfo, bool format)
+    private void Current_OnTagDiscoveredInLog(ITagInfo tagInfo, bool format)
     {
         try
         {

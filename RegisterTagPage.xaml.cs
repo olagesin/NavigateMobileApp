@@ -56,6 +56,13 @@ public partial class RegisterTagPage : ContentPage
         base.OnAppearing();
         // Refresh NFC status
         GetNFCStatus();
+
+        CrossNFC.Current.OnMessageReceived -= Current_OnMessageReceived;
+        CrossNFC.Current.OnMessagePublished -= Current_OnMessagePublished;
+        CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscovered;
+        CrossNFC.Current.OnTagListeningStatusChanged -= Current_OnTagListeningStatusChanged;
+        CrossNFC.Current.OnNfcStatusChanged -= Current_OnNfcStatusChanged;
+
     }
 
     /// <summary>
@@ -229,7 +236,7 @@ public partial class RegisterTagPage : ContentPage
     {
         try
         {
-            // Create a new text record 
+            //Create a new text record
             readInfo.Records = new NFCNdefRecord[] {
                 new NFCNdefRecord() {
                     TypeFormat = NFCNdefTypeFormat.Uri,
@@ -241,6 +248,8 @@ public partial class RegisterTagPage : ContentPage
 
             // Attempt to write text record to NFC tag
             CrossNFC.Current.PublishMessage(readInfo);
+
+            CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscovered;
         }
         catch
         {
