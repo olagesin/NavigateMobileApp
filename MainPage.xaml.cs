@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using NFCProj.DTOs;
+using NFCProj.Helpers;
 using Plugin.NFC;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -8,11 +10,14 @@ namespace NFCProj;
 
 public partial class MainPage : ContentPage
 {
-
+    //public bool IsLoading { get; set; } = false;
     public MainPage()
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
+
+        //BindingContext = this;
     }
+
 
     private async void RegisterTagButton_Clicked(object sender, EventArgs e)
     {
@@ -31,47 +36,73 @@ public partial class MainPage : ContentPage
 
     private async void LoginButton_Clicked(object sender, EventArgs e)
     {
-        // Perform authentication logic and get the token
-        //string token = await Authenticate(usernameEntry.Text, passwordEntry.Text);
-        string token = null;
-
-        var httpClient = new HttpClient();
-        var loginRequest = new LoginRequest()
+        try
         {
-            Email = usernameEntry.Text,
-            Password = passwordEntry.Text
-        };
+            string token = null;
+            var httpClient = new HttpClient();
+            var loginRequest = new LoginRequest()
+            {
+                Email = usernameEntry.Text,
+                Password = passwordEntry.Text
+            };
 
-        var jsonContent = new StringContent(
-            Newtonsoft.Json.JsonConvert.SerializeObject(loginRequest),
-            Encoding.UTF8,
-            "application/json"
-        );
+            var validationResult = ValidationHelper.Validate(loginRequest);
 
-        var response = await httpClient.PostAsync("https://parvigateapi.azurewebsites.net/Users/login", jsonContent);
+            if(validationResult.isValid == false)
+            {
+                var stringBuilder = new StringBuilder();
 
-        var responseAsString = await response.Content.ReadAsStringAsync();
+                foreach(var error in validationResult.errors)
+                {
+                    stringBuilder.AppendLine(error);
+                }
 
-        var responseData = JsonConvert.DeserializeObject<GlobalResponse<LoginResponse>>(responseAsString);
+                await DisplayAlert("Validation error", stringBuilder.ToString(), "Cancel");
 
-        if (response.IsSuccessStatusCode)
-        {
-            token = responseData.Data.Token;
-            var tokenToSave = token.Replace("\"", "");
+                stringBuilder.Clear();
+                return;
+            }
 
-            httpClient.DefaultRequestHeaders.Authorization =
-                     new AuthenticationHeaderValue("Bearer", tokenToSave);
+            LoadingIndicator.IsRunning = true;
 
-            // Save the token in local storage
-            Preferences.Set("Token", tokenToSave);
+            var jsonContent = new StringContent(
+                Newtonsoft.Json.JsonConvert.SerializeObject(loginRequest),
+                Encoding.UTF8,
+                "application/json"
+            );
 
-            // Navigate to the next page
-            await Navigation.PushAsync(new HomePage());
+            var response = await httpClient.PostAsync("https://parvigateapi.azurewebsites.net/Users/login", jsonContent);
+
+            var responseAsString = await response.Content.ReadAsStringAsync();
+
+            var responseData = JsonConvert.DeserializeObject<GlobalResponse<LoginResponse>>(responseAsString);
+
+            LoadingIndicator.IsRunning = false;
+
+            if (response.IsSuccessStatusCode)
+            {
+                token = responseData.Data.Token;
+                var tokenToSave = token.Replace("\"", "");
+
+                httpClient.DefaultRequestHeaders.Authorization =
+                         new AuthenticationHeaderValue("Bearer", tokenToSave);
+
+                // Save the token in local storage
+                Preferences.Set("Token", tokenToSave);
+
+                // Navigate to the next page
+                await Navigation.PushAsync(new HomePage());
+            }
+            else
+            {
+                await DisplayAlert(responseData.Errors.FirstOrDefault().Key,
+                    responseData.Errors.FirstOrDefault().ErrorMessages.FirstOrDefault(), "OK");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            await DisplayAlert(responseData.Errors.FirstOrDefault().Key,
-                responseData.Errors.FirstOrDefault().ErrorMessages.FirstOrDefault(), "OK");
+            await DisplayAlert("Error", ex.Message, "Cancel");
+            return;
         }
     }
 

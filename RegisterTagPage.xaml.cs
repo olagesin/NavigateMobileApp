@@ -9,8 +9,6 @@ namespace NFCProj;
 public partial class RegisterTagPage : ContentPage
 {
     private const string RegisterTagEndpoint = "https://parvigateapi.azurewebsites.net/Tags/add-tag";
-    private Button scanButton;
-
 
     /// <summary>
     /// Indicates whether an NFC read is taking place.
@@ -62,7 +60,6 @@ public partial class RegisterTagPage : ContentPage
         CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscovered;
         CrossNFC.Current.OnTagListeningStatusChanged -= Current_OnTagListeningStatusChanged;
         CrossNFC.Current.OnNfcStatusChanged -= Current_OnNfcStatusChanged;
-
     }
 
     /// <summary>
@@ -96,7 +93,7 @@ public partial class RegisterTagPage : ContentPage
                 // Start publishing NFC messages
                 CrossNFC.Current.StartPublishing();
 
-                btnWrite.Text = "Stop Writing";
+                //btnWrite.Text = "Stop Writing";
                 lblStatus.Text = "NFC Status: Writing...";
                 writing = true;
             }
@@ -106,7 +103,7 @@ public partial class RegisterTagPage : ContentPage
                 CrossNFC.Current.StopPublishing();
 
                 // Update control texts to reflect write status
-                btnWrite.Text = "Write";
+                //btnWrite.Text = "Write";
                 lblStatus.Text = "NFC Status: Ready";
                 writing = false;
             }
@@ -143,6 +140,7 @@ public partial class RegisterTagPage : ContentPage
 
             // Update button text and read status
             btnRead.Text = "Turn off NFC Scanner";
+            nfcReadStatus.Text = "Reading.....";
             reading = true;
             //saveTag.IsVisible = true;
         }
@@ -159,7 +157,8 @@ public partial class RegisterTagPage : ContentPage
             CrossNFC.Current.OnNfcStatusChanged -= Current_OnNfcStatusChanged;
 
             // Update button text and read status
-            btnRead.Text = "Turn on NFC scanner";
+            btnRead.Text = "Turn on NFC Scanner";
+            nfcReadStatus.Text = "Idle";
             reading = false;
             //saveTag.IsVisible = false;
         }
@@ -287,13 +286,11 @@ public partial class RegisterTagPage : ContentPage
         // Dispatch UI update to display tag info
         Dispatcher.Dispatch(() =>
         {
-            lblData.Text = $"Device ID: {Convert.ToHexString(tagInfo.Identifier)}" +
-            $"\nSerial Number: {tagInfo.SerialNumber}" +
+            lblData.Text = $"Serial Number: {tagInfo.SerialNumber}" +
             $"\nIs Empty: {tagInfo.IsEmpty}" +
-            $"\nIs Supported: {tagInfo.IsSupported}" +
-            $"\nIs Writable: {tagInfo.IsWritable}" +
-            $"\nCapacity: {tagInfo.Capacity}" +
             $"\nRecords: {(tagInfo.Records == null ? "null" : tagInfo.Records.FirstOrDefault().Message.ToString())}";
+
+
             tagData.IsVisible = true;
         });
     }

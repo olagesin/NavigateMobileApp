@@ -4,15 +4,13 @@
              x:Class="NFCProj.RegisterTagPage"
              Title="RegisterTagPage">
     <VerticalStackLayout>
-
-        <Label Text="Scan NFC Device!" Margin="0,-20,0,15" HorizontalTextAlignment="Center" TextColor="Black" FontSize="15" HorizontalOptions="Center"/>
+        <Label Text="Scan NFC Tag Here!" Margin="0,-20,0,15" HorizontalTextAlignment="Center" TextColor="Black" FontSize="15" HorizontalOptions="Center"/>
         
         <Button x:Name="btnRead" Text="Turn on NFC Scanner" Clicked="ReadClicked" HorizontalOptions="FillAndExpand"/>
-        
-        
-        <Button x:Name="btnWrite" Text="Write" Clicked="WriteClicked" BackgroundColor="#808080" TextColor="Black" HorizontalOptions="FillAndExpand"/>
-        
+
         <Label x:Name="lblStatus" Text="NFC Status on device:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+        <Label x:Name="nfcReadStatus" Text="Idle:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+
 
         <Button x:Name="saveTag" Text="Save Tag details" Clicked="ScanButton_Clicked" AutomationId="ScanButton" IsVisible="False"/>
 
@@ -20,6 +18,5 @@
             <Label x:Name="lblData"/>
             <Button Text="Clear" BackgroundColor="#808080" Margin="25,0,0,0" TextColor="Black" Clicked="ClearClicked" VerticalOptions="Center"/>
         </StackLayout>
-        <!--<Label x:Name="lblStatus" Text="NFC Status:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>-->
     </VerticalStackLayout>
 </ContentPage>

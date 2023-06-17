@@ -159,7 +159,7 @@ public partial class LogTagPage : ContentPage
                 UserName = "Sample user"
             };
 
-            CrossNFC.Current.StopListening();
+            //CrossNFC.Current.StopListening();
 
             // Posting assigned route details to the endpoint
             var httpClient = new HttpClient();
@@ -183,13 +183,27 @@ public partial class LogTagPage : ContentPage
 
             if (response.IsSuccessStatusCode)
             {
-                CrossNFC.Current.OnTagDiscovered += Current_OnTagDiscoveredInLog;
+                //make this a loop
+                //CrossNFC.Current.OnTagDiscovered += Current_OnTagDiscoveredInLog;
+
+                locationId = responseData.Data.Location.Id;
 
                 CrossNFC.Current.StartPublishing();
 
+                readInfo.Records = new NFCNdefRecord[] {
+                new NFCNdefRecord() {
+                    TypeFormat = NFCNdefTypeFormat.Uri,
+                    Payload = System.Text.Encoding.UTF8.GetBytes($"https://parvigateapi.azurewebsites.net/Locations/get-location?locationId={locationId}"),
+                    LanguageCode = "en"
+                }
+            };
+
+                // Attempt to write text record to NFC tag
+                CrossNFC.Current.PublishMessage(readInfo);
+
                 await DisplayAlert("Success", $"User assigned to {responseData.Data.Location.Name}", "OK");
 
-                CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscoveredInLog;
+                //CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscoveredInLog;
 
                 CrossNFC.Current.StopPublishing();
             }

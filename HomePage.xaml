@@ -10,8 +10,43 @@
             VerticalOptions="Center">
             
             <StackLayout>
-                <Button Text="Register Tag" Clicked="RegisterTagButton_Clicked" AutomationId="RegisterTagButton" />
-                <Button Text="Log Tag" Clicked="LogTagButton_Clicked" AutomationId="LogTagButton" />
+                <Grid BackgroundColor="#333333" Padding="16" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+                    <Button Text="Register Tag" 
+                        Clicked="RegisterTagButton_Clicked"
+                        AutomationId="RegisterTagButton"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        FontSize="20" 
+                        WidthRequest="200"
+                        HeightRequest="50"
+                        CornerRadius="8"/>
+                </Grid>
+                
+                <Grid BackgroundColor="#333333" Padding="16" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+
+                        <Button Text="Tag Assigning"
+                        Clicked="LogTagButton_Clicked"
+                        AutomationId="LogTagButton"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        FontSize="20" 
+                        WidthRequest="200"
+                        HeightRequest="50"
+                        CornerRadius="8"/>
+                </Grid>
+
+                <Grid BackgroundColor="#333333" Padding="16" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
+
+                    <Button Text="Log User Arrivals"
+                        Clicked="LogTagButton_Clicked"
+                        AutomationId="LogTagButton"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        FontSize="20" 
+                        WidthRequest="200"
+                        HeightRequest="50"
+                        CornerRadius="8"/>
+                </Grid>
             </StackLayout>
         </VerticalStackLayout>
     </ScrollView>

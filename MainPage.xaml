@@ -17,11 +17,9 @@
                 <Entry x:Name="passwordEntry" Placeholder="Password" IsPassword="True" />
 
                 <Button Text="Login" Clicked="LoginButton_Clicked" HorizontalOptions="Center" Margin="0,20,0,0" />
+
+                <ActivityIndicator x:Name="LoadingIndicator" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
             </StackLayout>
-            <!--<StackLayout>
-                <Button Text="Register Tag" Clicked="RegisterTagButton_Clicked" AutomationId="RegisterTagButton" />
-                <Button Text="Log Tag" Clicked="LogTagButton_Clicked" AutomationId="LogTagButton" />
-            </StackLayout>-->
         </VerticalStackLayout>
     </ScrollView>
 
