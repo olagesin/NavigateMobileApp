@@ -15,5 +15,8 @@ namespace NFCProj.DTOs
 
         [Required]
         public string DestinationLocationId { get; set; }
+
+        [Required]
+        public string EventId { get; set; }
     }
 }

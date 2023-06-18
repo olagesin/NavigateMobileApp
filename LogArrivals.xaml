@@ -11,8 +11,8 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <RadioButton x:Name="ArrivalButton" Content="Option 1" GroupName="OptionsGroup" IsEnabled="{Binding IsRadioEnabled}" />
-        <RadioButton x:Name="DepartureButton" Content="Option 2" GroupName="OptionsGroup" IsEnabled="{Binding IsRadioEnabled}" Grid.Row="1" />
+        <RadioButton x:Name="ArrivalButton" Content="Arrival" GroupName="OptionsGroup" />
+        <RadioButton x:Name="DepartureButton" Content="Departure" GroupName="OptionsGroup" Grid.Row="1" />
         
         <Button x:Name="ReadButton" Text="Read Tag" Clicked="ReadButton_Clicked" Grid.Row="2" />
 

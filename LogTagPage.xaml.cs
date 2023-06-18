@@ -136,6 +136,11 @@ public partial class LogTagPage : ContentPage
         return Locations.Find(location => location.Name == locationName);
     }
 
+    private GetEventDto GetSelectedEvents(string eventName)
+    {
+        return Events.Find(events => events.EventName == eventName);
+    }
+
     private async void CalculateRouteButton_Clicked(object sender, EventArgs e)
     {
         if (string.IsNullOrEmpty(sourcePicker.SelectedItem.ToString()) || string.IsNullOrEmpty(destinationPicker.SelectedItem.ToString()))
@@ -154,6 +159,7 @@ public partial class LogTagPage : ContentPage
 
         var sourceLocation = GetSelectedLocation(sourcePicker.SelectedItem.ToString());
         var destinationLocation = GetSelectedLocation(destinationPicker.SelectedItem.ToString());
+        var eventChosen = GetSelectedEvents(eventPicker.SelectedItem.ToString());
 
         CrossNFC.Current.StartListening();
 
@@ -171,6 +177,7 @@ public partial class LogTagPage : ContentPage
                 SourceLocationId = sourceLocation.Id,
                 DestinationLocationId = destinationLocation.Id,
                 SerialNumber = readInfo.SerialNumber,
+                EventId = eventChosen.Id,
                 UserName = "Sample user"
             };
 

@@ -1,6 +1,7 @@
 using NFCProj.DTOs;
 using Plugin.NFC;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace NFCProj;
 
@@ -171,6 +172,16 @@ public partial class LogArrivals : ContentPage
         var httpClient = new HttpClient();
         var bearerToken = Preferences.Get("Token", null);
 
+        // Perform the operation based on the selected radio button
+        if (ArrivalButton.IsChecked)
+        {
+            CheckInType = CheckInType.Arrival;
+        }
+        else if (DepartureButton.IsChecked)
+        {
+            CheckInType = CheckInType.Departure;
+        }
+
         httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
         httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {bearerToken}");
 
@@ -182,31 +193,28 @@ public partial class LogArrivals : ContentPage
             TagSerialNumber = readInfo.SerialNumber
         };
 
-        var response = await httpClient.PostAsync("https://parvigateapi.azurewebsites.net/LocationTags/assign-location-to-tag", jsonContent);
+        var jsonContent = new StringContent(
+            Newtonsoft.Json.JsonConvert.SerializeObject(requestToSend),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+
+        var response = await httpClient.PostAsync("https://parvigateapi.azurewebsites.net/LocationTags/log-tag-arrival", jsonContent);
 
         var responseAsString = await response.Content.ReadAsStringAsync();
 
-        var responseData = JsonConvert.DeserializeObject<GlobalResponse<GetEventDto>>(responseAsString);
+        var responseData = JsonConvert.DeserializeObject<GlobalResponse<GetParkingRecordDto>>(responseAsString);
 
 
         if (response.IsSuccessStatusCode)
         {
-            await DisplayAlert("Success", "User assigned successfulyy", "OK");
+            await DisplayAlert("Success", "User arrival logged!!", "OK");
         }
         else
         {
             await DisplayAlert(responseData.Errors.FirstOrDefault().Key,
                 responseData.Errors.FirstOrDefault().ErrorMessages.FirstOrDefault(), "OK");
         }
-        // Dispatch UI update to display tag info
-        //Dispatcher.Dispatch(() =>
-        //{
-        //    lblData.Text = $"Serial Number: {tagInfo.SerialNumber}" +
-        //    $"\nIs Empty: {tagInfo.IsEmpty}" +
-        //    $"\nRecords: {(tagInfo.Records == null ? "null" : tagInfo.Records.FirstOrDefault().Message.ToString())}";
-
-
-        //    tagData.IsVisible = true;
-        //});
     }
 }
