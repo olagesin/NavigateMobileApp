@@ -13,22 +13,13 @@ public partial class LogTagPage : ContentPage
     private const string LogTagEndpoint = "https://parvigateapi.azurewebsites.net/Tags/log-tag";
     private const string AssignToTagEndpoint = "https://parvigateapi.azurewebsites.net/LocationTags/assign-location-to-tag";
     private const string GetLocationsEndpoint = "https://parvigateapi.azurewebsites.net/Locations/list-all-locations";
+    private const string GetEventsEndpoint = "https://parvigateapi.azurewebsites.net/Events/list-all-events";
 
-    private Button calculateRouteButton;
-    private Button scanButton;
-    //private Picker sourcePicker;
-    //private Picker destinationPicker;
 
     private List<GetLocationDto> Locations;
 
-    /// <summary>
-    /// Indicates whether an NFC read is taking place.
-    /// </summary>
-    private bool reading = false;
-    /// <summary>
-    /// Indicates whether an NFC write is taking place.
-    /// </summary>
-    private bool writing = false;
+    private List<GetEventDto> Events;
+
     /// <summary>
     /// The most recently saved NFC tag info.
     /// </summary>
@@ -64,7 +55,31 @@ public partial class LogTagPage : ContentPage
         
         await LoadLocations();
 
+        await LoadEvents();
+
         GetNFCStatus();
+    }
+
+    private async Task LoadEvents()
+    {
+        var httpClient = new HttpClient();
+        var bearertoken = Preferences.Get("Token", "Invalid token");
+
+        httpClient.DefaultRequestHeaders.Authorization =
+                      new AuthenticationHeaderValue("Bearer", bearertoken.Replace("\"", ""));
+
+        var eventsResponse = await httpClient.GetAsync(GetEventsEndpoint);
+
+        var eventContent = await eventsResponse.Content.ReadAsStringAsync();
+
+        var eventsResponseData = JsonConvert.DeserializeObject<GlobalResponse<List<GetEventDto>>>(eventContent);
+
+        Events = eventsResponseData.Data;
+
+        foreach (var eventToSelect in Events)
+        {
+            eventPicker.Items.Add(eventToSelect.EventName);
+        }
     }
 
     private async Task LoadLocations()
@@ -80,12 +95,12 @@ public partial class LogTagPage : ContentPage
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
-            var responseData = JsonConvert.DeserializeObject<GlobalResponse<List<GetLocationDto>>>(content);
 
-            Locations = responseData.Data;
 
+            var locationResponseData = JsonConvert.DeserializeObject<GlobalResponse<List<GetLocationDto>>>(content);
+
+            Locations = locationResponseData.Data;
             
-
             // Update source and destination pickers with location names
             foreach (var location in Locations)
             {
@@ -159,7 +174,6 @@ public partial class LogTagPage : ContentPage
                 UserName = "Sample user"
             };
 
-            //CrossNFC.Current.StopListening();
 
             // Posting assigned route details to the endpoint
             var httpClient = new HttpClient();
@@ -183,17 +197,15 @@ public partial class LogTagPage : ContentPage
 
             if (response.IsSuccessStatusCode)
             {
-                //make this a loop
-                //CrossNFC.Current.OnTagDiscovered += Current_OnTagDiscoveredInLog;
-
                 locationId = responseData.Data.Location.Id;
+                var eventId = responseData.Data.Event.Id;
 
                 CrossNFC.Current.StartPublishing();
 
                 readInfo.Records = new NFCNdefRecord[] {
                 new NFCNdefRecord() {
                     TypeFormat = NFCNdefTypeFormat.Uri,
-                    Payload = System.Text.Encoding.UTF8.GetBytes($"https://parvigateapi.azurewebsites.net/Locations/get-location?locationId={locationId}"),
+                    Payload = System.Text.Encoding.UTF8.GetBytes($"https://parvigateapi.azurewebsites.net/Locations/get-location?locationId={locationId}&eventId={eventId}"),
                     LanguageCode = "en"
                 }
             };
@@ -203,42 +215,16 @@ public partial class LogTagPage : ContentPage
 
                 await DisplayAlert("Success", $"User assigned to {responseData.Data.Location.Name}", "OK");
 
-                //CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscoveredInLog;
-
                 CrossNFC.Current.StopPublishing();
             }
             else
             {
-                //await DisplayAlert("Error", "Failed to assign tag", "OK");
                 await DisplayAlert(responseData.Errors.FirstOrDefault().Key,
                 responseData.Errors.FirstOrDefault().ErrorMessages.FirstOrDefault(), "OK");
             }
         }
     }
 
-    private async void ScanButton_Clicked(object sender, EventArgs e)
-    {
-        // Simulating tag scanning
-        var scannedTag = "123456";
-
-        // Requesting tag assignment with the scanned tag
-        var httpClient = new HttpClient();
-        var jsonContent = new StringContent(
-            Newtonsoft.Json.JsonConvert.SerializeObject(scannedTag),
-            Encoding.UTF8,
-            "application/json"
-        );
-        var response = await httpClient.PostAsync(LogTagEndpoint, jsonContent);
-
-        if (response.IsSuccessStatusCode)
-        {
-            await DisplayAlert("Success", "Tag logged successfully", "OK");
-        }
-        else
-        {
-            await DisplayAlert("Error", "Failed to log tag", "OK");
-        }
-    }
 
     /// <summary>
     /// Event fired when an NFC message is received (read) from a tag.

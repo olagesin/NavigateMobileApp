@@ -3,7 +3,26 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="NFCProj.LogArrivals"
              Title="LogArrivals">
-    <VerticalStackLayout>
+
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <RadioButton x:Name="ArrivalButton" Content="Option 1" GroupName="OptionsGroup" IsEnabled="{Binding IsRadioEnabled}" />
+        <RadioButton x:Name="DepartureButton" Content="Option 2" GroupName="OptionsGroup" IsEnabled="{Binding IsRadioEnabled}" Grid.Row="1" />
         
-    </VerticalStackLayout>
+        <Button x:Name="ReadButton" Text="Read Tag" Clicked="ReadButton_Clicked" Grid.Row="2" />
+
+        <Label x:Name="lblStatus" Text="NFC Status on device:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+
+        <Label x:Name="nfcReadStatus" Text="Idle:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+    </Grid>
+    <!--<VerticalStackLayout>
+        <Label x:Name="lblStatus" Text="NFC Status on device:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+
+        <Label x:Name="nfcReadStatus" Text="Idle:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+    </VerticalStackLayout>-->
 </ContentPage>

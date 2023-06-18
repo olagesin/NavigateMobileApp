@@ -53,6 +53,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Plugin.NFC" Version="0.1.26" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls.Compatibility" Version="2.88.3" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -38,8 +38,8 @@
                 <Grid BackgroundColor="#333333" Padding="16" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand">
 
                     <Button Text="Log User Arrivals"
-                        Clicked="LogTagButton_Clicked"
-                        AutomationId="LogTagButton"
+                        Clicked="LogArrivalsButton_Clicked"
+                        AutomationId="LogArrivalButton"
                         BackgroundColor="#2196F3"
                         TextColor="White"
                         FontSize="20" 
