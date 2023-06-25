@@ -59,7 +59,7 @@ public partial class LogArrivals : ContentPage
 
         CrossNFC.Current.OnMessageReceived += Current_OnMessageReceived;
         CrossNFC.Current.OnMessagePublished += Current_OnMessagePublished;
-        //CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscovered;
+        CrossNFC.Current.OnTagDiscovered += Current_OnTagDiscovered;
         CrossNFC.Current.OnTagListeningStatusChanged += Current_OnTagListeningStatusChanged;
         CrossNFC.Current.OnNfcStatusChanged += Current_OnNfcStatusChanged;
     }
@@ -84,57 +84,17 @@ public partial class LogArrivals : ContentPage
         Dispatcher.Dispatch(() => lblStatus.Text = $"NFC Status: {(isListening ? "Listening..." : "Ready")}");
     }
 
-    /// <summary>
-    /// Event fired when an NFC tag is discovered while writing.
-    /// </summary>
-    /// <param name="tagInfo">The NFC tag's info.</param>
-    /// <param name="format">Indicates whether the NFC tag is being formatted.</param>
-    //private void Current_OnTagDiscovered(ITagInfo tagInfo, bool format)
-    //{
-    //    try
-    //    {
-    //        //Create a new text record
-    //        readInfo.Records = new NFCNdefRecord[] {
-    //            new NFCNdefRecord() {
-    //                TypeFormat = NFCNdefTypeFormat.Uri,
-    //                Payload = System.Text.Encoding.UTF8.GetBytes("https://www.nuget.org/packages/Plugin.NFC"),
-    //                LanguageCode = "en"
-    //            }
-    //        };
 
 
-    //        // Attempt to write text record to NFC tag
-    //        CrossNFC.Current.PublishMessage(readInfo);
-
-    //        CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscovered;
-    //    }
-    //    catch
-    //    {
-    //        // Writing not supported, dispatch alert to the UI
-    //        Dispatcher.Dispatch(() => DisplayAlert("NFC Error", $"Failed to write tag.", "OK"));
-    //    }
-    //    finally
-    //    {
-    //        // Stop writing
-    //        WriteClicked(null, null);
-    //    }
-    //}
-
-    private async void ReadButton_Clicked(object sender, EventArgs e)
+    private async void ClosePage_Clicked(object sender, EventArgs e)
     {
-        IsRadioEnabled = false; // Disable radio buttons
+        CrossNFC.Current.OnMessageReceived -= Current_OnMessageReceived;
+        CrossNFC.Current.OnMessagePublished -= Current_OnMessagePublished;
+        CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscovered;
+        CrossNFC.Current.OnTagListeningStatusChanged -= Current_OnTagListeningStatusChanged;
+        CrossNFC.Current.OnNfcStatusChanged -= Current_OnNfcStatusChanged;
 
-        // Perform the operation based on the selected radio button
-        if (ArrivalButton.IsChecked)
-        {
-            CheckInType = CheckInType.Arrival;
-        }
-        else if (DepartureButton.IsChecked)
-        {
-            CheckInType = CheckInType.Departure;
-        }
-
-        IsRadioEnabled = true; // Enable radio buttons again
+        await Navigation.PopAsync();
     }
 
     /// <summary>
@@ -145,6 +105,11 @@ public partial class LogArrivals : ContentPage
     {
         // Dispatch alert to the UI
         Dispatcher.Dispatch(() => DisplayAlert("NFC Event", $"Write successful.", "OK"));
+    }
+
+    private void Current_OnTagDiscovered(ITagInfo tagInfo, bool format)
+    {
+        readInfo = tagInfo;
     }
 
     /// <summary>

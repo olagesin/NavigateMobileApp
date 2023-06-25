@@ -11,8 +11,11 @@
             <Picker x:Name="destinationPicker" Title="Select Destination Location" SelectedIndexChanged="Picker_SelectedIndexChanged" />
             <Picker x:Name="eventPicker" Title="Select Event" SelectedIndexChanged="Picker_SelectedIndexChanged" />
             
-            <Button Text="Assign To Location to Tag" Clicked="CalculateRouteButton_Clicked" AutomationId="CalculateRouteButton" />
+            <Button Text="Assign Location to Tag" Clicked="CalculateRouteButton_Clicked" AutomationId="CalculateRouteButton" />
             <Label x:Name="NfcStatus" Text="NFC Status:" TextColor="Black" FontAttributes="Bold" Margin="0,10,0,0" HorizontalOptions="Center"/>
+
+            <Button Text="Close Page" Clicked="ClosePageButton_Clicked"/>
+
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

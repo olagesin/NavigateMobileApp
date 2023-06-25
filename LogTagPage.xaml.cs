@@ -244,37 +244,44 @@ public partial class LogTagPage : ContentPage
     }
 
 
+    private async void ClosePageButton_Clicked(object sender, EventArgs e)
+    {
+        CrossNFC.Current.OnMessageReceived -= Current_OnMessageReceived;
+
+        await Navigation.PopAsync();
+    }
+
     /// <summary>
     /// Event fired when an NFC tag is discovered while writing.
     /// </summary>
     /// <param name="tagInfo">The NFC tag's info.</param>
     /// <param name="format">Indicates whether the NFC tag is being formatted.</param>
-    private void Current_OnTagDiscoveredInLog(ITagInfo tagInfo, bool format)
-    {
-        try
-        {
-            // Create a new text record 
-            readInfo.Records = new NFCNdefRecord[] {
-                new NFCNdefRecord() {
-                    TypeFormat = NFCNdefTypeFormat.Uri,
-                    Payload = System.Text.Encoding.UTF8.GetBytes($"https://parvigateapi.azurewebsites.net/Locations/get-location?locationId={locationId}"),
-                    LanguageCode = "en"
-                }
-            };
+    //private void Current_OnTagDiscoveredInLog(ITagInfo tagInfo, bool format)
+    //{
+    //    try
+    //    {
+    //        // Create a new text record 
+    //        readInfo.Records = new NFCNdefRecord[] {
+    //            new NFCNdefRecord() {
+    //                TypeFormat = NFCNdefTypeFormat.Uri,
+    //                Payload = System.Text.Encoding.UTF8.GetBytes($"https://parvigateapi.azurewebsites.net/Locations/get-location?locationId={locationId}"),
+    //                LanguageCode = "en"
+    //            }
+    //        };
 
-            // Attempt to write text record to NFC tag
-            CrossNFC.Current.PublishMessage(readInfo);
-        }
-        catch
-        {
-            // Writing not supported, dispatch alert to the UI
-            Dispatcher.Dispatch(() => DisplayAlert("NFC Error", $"Failed to write tag.", "OK"));
-        }
-        finally
-        {
-            // Stop writing
-            //WriteClicked(null, null);
-            CrossNFC.Current.StopPublishing();
-        }
-    }
+    //        // Attempt to write text record to NFC tag
+    //        CrossNFC.Current.PublishMessage(readInfo);
+    //    }
+    //    catch
+    //    {
+    //        // Writing not supported, dispatch alert to the UI
+    //        Dispatcher.Dispatch(() => DisplayAlert("NFC Error", $"Failed to write tag.", "OK"));
+    //    }
+    //    finally
+    //    {
+    //        // Stop writing
+    //        //WriteClicked(null, null);
+    //        CrossNFC.Current.StopPublishing();
+    //    }
+    //}
 }

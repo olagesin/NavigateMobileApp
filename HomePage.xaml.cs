@@ -15,6 +15,7 @@ public partial class HomePage : ContentPage
     private async void LogTagButton_Clicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new LogTagPage());
+    
     }
 
     private async void LogArrivalsButton_Clicked(object sender, EventArgs e)

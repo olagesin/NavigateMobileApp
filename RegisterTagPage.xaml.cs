@@ -164,6 +164,17 @@ public partial class RegisterTagPage : ContentPage
         }
     }
 
+    private async void ClosePageButton_Clicked(object sender, EventArgs e)
+    {
+        CrossNFC.Current.OnMessageReceived -= Current_OnMessageReceived;
+        CrossNFC.Current.OnMessagePublished -= Current_OnMessagePublished;
+        CrossNFC.Current.OnTagDiscovered -= Current_OnTagDiscovered;
+        CrossNFC.Current.OnTagListeningStatusChanged -= Current_OnTagListeningStatusChanged;
+        CrossNFC.Current.OnNfcStatusChanged -= Current_OnNfcStatusChanged;
+
+        await Navigation.PopAsync();
+    }
+
     private async void ScanButton_Clicked(object sender, EventArgs e)
     {
 
